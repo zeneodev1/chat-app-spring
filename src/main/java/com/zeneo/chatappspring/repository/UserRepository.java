@@ -1,7 +1,14 @@
 package com.zeneo.chatappspring.repository;
 
-import com.zeneo.chatappspring.model.User;
+import com.zeneo.chatappspring.model.DB.User;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
+import java.util.List;
+
 public interface UserRepository extends MongoRepository<User, String> {
+
+    User findUserByEmailEquals(String email);
+
+    List<User> findAllByEmailContains(String email, Pageable pageable);
 }

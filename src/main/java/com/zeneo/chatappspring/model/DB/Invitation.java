@@ -1,24 +1,24 @@
-package com.zeneo.chatappspring.model;
+package com.zeneo.chatappspring.model.DB;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.List;
-
 @Setter
 @Getter
-@ToString
 @Document
-public class Conversation {
+public class Invitation {
 
     @Id
     private String id;
-    private String type;
+    private String status;
     @DBRef
-    private List<User> participants;
-    private Message lastMessage;
+    private User from;
+    @DBRef
+    private User to;
+    private String fromId;
+    private String toId;
+
 }

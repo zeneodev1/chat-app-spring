@@ -1,4 +1,4 @@
-package com.zeneo.chatappspring.model;
+package com.zeneo.chatappspring.model.DB;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -19,6 +19,6 @@ public class Message {
     private Date sentAt;
     private String status;
     private String from;
-    private String conId;
+    private String conversationId;
     private List<MessageStatus> messageStatuses;
 }

@@ -1,4 +1,4 @@
-package com.zeneo.chatappspring.model;
+package com.zeneo.chatappspring.model.DB;
 
 import lombok.Data;
 

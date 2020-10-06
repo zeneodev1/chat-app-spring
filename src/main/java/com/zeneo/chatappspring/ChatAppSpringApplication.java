@@ -1,20 +1,34 @@
 package com.zeneo.chatappspring;
 
-import com.zeneo.chatappspring.model.UserProfile;
+import com.zeneo.chatappspring.model.DB.Conversation;
+import com.zeneo.chatappspring.model.DB.User;
+import com.zeneo.chatappspring.repository.ConversationRepository;
+import com.zeneo.chatappspring.repository.UserRepository;
+import com.zeneo.chatappspring.services.ImagesService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.hash.HashMapper;
-import org.springframework.data.redis.hash.ObjectHashMapper;
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.data.mongodb.core.ChangeStreamEvent;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
+import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.socket.config.annotation.EnableWebSocket;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.Date;
-import java.util.Map;
+import java.util.Arrays;
+
+import static org.springframework.data.mongodb.core.query.Criteria.where;
 
 @SpringBootApplication
+@Slf4j
 public class ChatAppSpringApplication implements ApplicationRunner {
 
     public static void main(String[] args) {
@@ -23,31 +37,24 @@ public class ChatAppSpringApplication implements ApplicationRunner {
 
 
     @Autowired
-    RedisTemplate<String, Object> redisTemplate;
+    UserRepository userRepository;
+    @Autowired
+    ConversationRepository conversationRepository;
 
-    HashMapper<Object, byte[], byte[]> mapper = new ObjectHashMapper();
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
-    public void writeHash(String key, UserProfile userProfile) {
+    @Autowired
+    ReactiveMongoTemplate reactiveMongoTemplate;
 
-        HashOperations<String, byte[], byte[]> hashOperations = redisTemplate.opsForHash();
-        Map<byte[], byte[]> mappedHash = mapper.toHash(userProfile);
-        hashOperations.putAll(key, mappedHash);
-    }
-
-    public UserProfile loadHash(String key) {
-        HashOperations<String, byte[], byte[]> hashOperations = redisTemplate.opsForHash();
-        Map<byte[], byte[]> loadedHash = hashOperations.entries(key);
-        return (UserProfile) mapper.fromHash(loadedHash);
-    }
+    @Autowired
+    ImagesService imagesService;
 
     @Override
     public void run(ApplicationArguments args) {
-        UserProfile userProfile = new UserProfile();
-        userProfile.setGender("Male");
-        userProfile.setPhone("+212698563902");
-        userProfile.setBirthDay(new Date(System.currentTimeMillis()));
-        writeHash("1", userProfile);
-        System.out.println(loadHash("1"));
+        imagesService.init();
     }
+
+
 
 }

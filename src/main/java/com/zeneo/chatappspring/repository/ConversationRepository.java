@@ -1,15 +1,17 @@
 package com.zeneo.chatappspring.repository;
 
-import com.zeneo.chatappspring.model.Conversation;
-import com.zeneo.chatappspring.model.User;
-import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.redis.core.RedisHash;
-
+import com.zeneo.chatappspring.model.DB.Conversation;
+import com.zeneo.chatappspring.model.DB.User;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.repository.Query;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
+import reactor.core.publisher.Flux;
 import java.util.List;
 
-@RedisHash
-public interface ConversationRepository extends MongoRepository<Conversation, String> {
 
-    List<Conversation> findAllByParticipantsContains(List<User> participants);
+public interface ConversationRepository extends ReactiveMongoRepository<Conversation, String> {
+
+    @Query("{ 'participantsId': { $all: [?0] } }")
+    Flux<Conversation> findByParticipantId(String id, Sort sort);
 
 }
