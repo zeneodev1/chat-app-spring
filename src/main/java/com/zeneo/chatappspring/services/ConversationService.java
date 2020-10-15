@@ -1,12 +1,16 @@
 package com.zeneo.chatappspring.services;
 
 import com.zeneo.chatappspring.model.DB.Conversation;
+import com.zeneo.chatappspring.model.LastSeenRequest;
 import com.zeneo.chatappspring.repository.ConversationRepository;
 import com.zeneo.chatappspring.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.ChangeStreamEvent;
+import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -24,7 +28,7 @@ public class ConversationService {
     private ReactiveMongoTemplate reactiveMongoTemplate;
 
     @Autowired
-    private UserRepository userRepository;
+    private MongoOperations mongoOperations;
 
 
     public Flux<ChangeStreamEvent<Conversation>> listenToAllUserConversations(String userId) {
@@ -56,4 +60,11 @@ public class ConversationService {
         conversationRepository.delete(conversation).subscribe();
     }
 
+    public Conversation updateLastSeen(LastSeenRequest request) {
+        Query query = new Query(where("id").is(request.getConversationId()));
+        Update update = new Update();
+        update.set("unseenMessages." + request.getUserId(), 0);
+        update.set("lastSeenMessage." + request.getUserId(), request.getMessageId());
+        return mongoOperations.findAndModify(query, update, Conversation.class);
+    }
 }

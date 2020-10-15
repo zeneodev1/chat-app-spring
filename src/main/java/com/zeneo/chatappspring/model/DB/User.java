@@ -31,7 +31,7 @@ public class User implements Serializable {
     @DBRef(lazy = true)
     @JsonIgnore
     @ToString.Exclude
-    private List<User> friends = new ArrayList<>();
+    private List<Person> friends = new ArrayList<>();
     private String gender;
     private String phone;
     private Date birthDay;

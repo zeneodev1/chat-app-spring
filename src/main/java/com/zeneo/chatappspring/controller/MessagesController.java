@@ -1,6 +1,9 @@
 package com.zeneo.chatappspring.controller;
 
+import com.zeneo.chatappspring.model.DB.Conversation;
 import com.zeneo.chatappspring.model.DB.Message;
+import com.zeneo.chatappspring.model.LastSeenRequest;
+import com.zeneo.chatappspring.services.ConversationService;
 import com.zeneo.chatappspring.services.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -9,7 +12,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
 
 import java.util.List;
 
@@ -18,6 +20,9 @@ public class MessagesController {
 
     @Autowired
     private MessageService messageService;
+
+    @Autowired
+    private ConversationService conversationService;
 
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
@@ -35,5 +40,10 @@ public class MessagesController {
         simpMessagingTemplate.convertAndSend("/topic/messages/" + conversationId, message);
     }
 
+    @MessageMapping("/messages/{conversationId}/seen")
+    private void handleSeenMessages(LastSeenRequest message, @DestinationVariable("conversationId") String conversationId) {
+        Conversation conversation = conversationService.updateLastSeen(message);
+        simpMessagingTemplate.convertAndSend("/topic/messages/" + conversationId + "/seen", conversation);
+    }
 
 }

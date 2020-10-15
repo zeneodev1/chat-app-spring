@@ -15,9 +15,9 @@ public class Invitation {
     private String id;
     private String status;
     @DBRef
-    private User from;
+    private Person from;
     @DBRef
-    private User to;
+    private Person to;
     private String fromId;
     private String toId;
 

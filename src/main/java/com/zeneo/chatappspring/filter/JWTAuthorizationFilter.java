@@ -30,7 +30,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-        String header = request.getHeader("Authorization");
+        String header = request.getHeader("X-Authorization");
         Cookie[] cookies = request.getCookies();
         Cookie authorizationCookie = null;
         String jwtToken;
@@ -40,7 +40,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
         } else {
             if (cookies != null) {
                 for (Cookie cookie: cookies) {
-                    if (cookie.getName().equals("Authorization")) {
+                    if (cookie.getName().equals("X-Authorization")) {
                         authorizationCookie = cookie;
                     }
                 }
@@ -54,23 +54,29 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
         }
         DecodedJWT decodedJWT = null;
         try {
-            decodedJWT = JWT
-                    .require(Algorithm.HMAC256("dklfajgaiodhaodjfahsjauwiqwjeadnaefewjhikdhuiakh"))
-                    .build().verify(jwtToken);
+            decodedJWT = verifyJWT(jwtToken);
         } catch (TokenExpiredException tokenExpiredException) {
-            Cookie cookie = new Cookie("Authorization", "");
+            Cookie cookie = new Cookie("X-Authorization", "");
             cookie.setMaxAge(0);
             cookie.setPath("/");
             response.addCookie(cookie);
         }
 
 
+        assert decodedJWT != null;
         UsernamePasswordAuthenticationToken token =
-                new UsernamePasswordAuthenticationToken(decodedJWT.getClaim("uid"), null, new ArrayList<>());
+                new UsernamePasswordAuthenticationToken(decodedJWT.getClaim("uid").asString(), null, new ArrayList<>());
 
         SecurityContextHolder.getContext().setAuthentication(token);
 
 
         chain.doFilter(request, response);
     }
+
+    public static DecodedJWT verifyJWT(String token) {
+        return JWT
+                .require(Algorithm.HMAC256("dklfajgaiodhaodjfahsjauwiqwjeadnaefewjhikdhuiakh"))
+                .build().verify(token);
+    }
+
 }

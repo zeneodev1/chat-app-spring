@@ -5,6 +5,7 @@ import com.zeneo.chatappspring.model.DB.Conversation;
 import com.zeneo.chatappspring.services.ConversationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

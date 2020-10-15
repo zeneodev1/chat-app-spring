@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.zeneo.chatappspring.model.ChangePasswordRequest;
 import com.zeneo.chatappspring.model.DB.Invitation;
+import com.zeneo.chatappspring.model.DB.Person;
 import com.zeneo.chatappspring.model.DB.User;
 import com.zeneo.chatappspring.model.UserUpdateRequest;
 import com.zeneo.chatappspring.services.ImagesService;
@@ -58,12 +59,11 @@ public class UserController {
                 .withExpiresAt(new Date(System.currentTimeMillis() + 10000000))
                 .withClaim("uid", user.getId())
                 .sign(Algorithm.HMAC256("dklfajgaiodhaodjfahsjauwiqwjeadnaefewjhikdhuiakh"));
-        servletResponse.addHeader("x-access-token", JWT_token);
-        servletResponse.addHeader("Access-Control-Expose-Headers", "x-access-token");
-        Cookie cookie = new Cookie("Authorization", JWT_token);
+        servletResponse.addHeader("X-Authorization", JWT_token);
+        servletResponse.addHeader("Access-Control-Expose-Headers", "X-Authorization");
+        Cookie cookie = new Cookie("X-Authorization", JWT_token);
         cookie.setMaxAge(10000);
         cookie.setPath("/");
-
         servletResponse.addCookie(cookie);
         return user.hidePassword();
     }
@@ -79,6 +79,13 @@ public class UserController {
     public User handelGetUser(@PathVariable("id") String id) {
         return userService.getUserData(id);
     }
+
+    @GetMapping("/user/{id}/friends")
+    @PreAuthorize("authentication.name == #id")
+    public List<Person> handelGetUserFriend(@PathVariable("id") String id) {
+        return userService.getUserData(id).getFriends();
+    }
+
 
     @PostMapping("/user/changePassword")
     @PreAuthorize("authentication.name == #changePasswordRequest.id")
@@ -97,6 +104,7 @@ public class UserController {
         userService.updateUserData(updateRequest);
         return updateRequest;
     }
+
 
 
     @GetMapping("/user/search")
